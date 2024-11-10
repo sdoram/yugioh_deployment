@@ -66,8 +66,11 @@ while True:
         else:
             big_data[1].append(value)
     big_data[0].append(">")
-    big_data[1].append("")
+    big_data[1].append(" ")
 
+# O열 넘기는지 체크용
+current_location = big_data[0].index('>')
+next_location = big_data[0].index('>', current_location+1)
 
 for i, data in enumerate(big_data):
     if i == 0:
@@ -75,6 +78,14 @@ for i, data in enumerate(big_data):
     max_col = 15
     
     for idx, value in enumerate(data):
+        if value == '>' and col_idx + next_location - current_location > 16:
+            col_idx = 1
+            row_idx += 2
+            current_location = next_location
+            try:
+                next_location = big_data[0].index('>', current_location+1)
+            except ValueError:
+                next_location = current_location
         image_file_path = image_folder / f"{value}.png"
         # 이미지 파일이 존재하면 엑셀에 추가
         if image_file_path.exists():
@@ -91,13 +102,17 @@ for i, data in enumerate(big_data):
             cell_location = f"{chr(65 + col_idx - 1)}{row_idx}"
             ws.add_image(img, cell_location)
         else:
+            if i == 1 and value == ' ' and col_idx + next_location - current_location > 16:
+                col_idx = 1
+                row_idx += 2
+                current_location = next_location
+                try:
+                    next_location = big_data[0].index('>', current_location+1)
+                except ValueError:
+                    next_location = current_location
             print(f"이미지를 찾을 수 없습니다: {image_file_path}")
             ws.cell(row=row_idx, column=col_idx, value=value)
-        
         col_idx += 1
-        if col_idx > max_col:
-            col_idx = 1
-            row_idx += 2
     # 첫번째 for문이 끝나고 방법에 해당하는 반복문이 진행되기 전에 row, col의 정보를 갱신
     row_idx, col_idx = 4, 2
 
