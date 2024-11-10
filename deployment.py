@@ -4,11 +4,12 @@
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment, Font
+from pathlib import Path
 import os
 
 file_name = input("수정할 파일명을 입력하세요 (확장자 제외): ") + ".xlsx"
 big_data = [[], []]
-image_folder = f"C:/Users/Administrator/Desktop/yugioh_deployment/이미지/{file_name.split('.xlsx')[0]}/"
+image_folder = Path.cwd() / "이미지" / file_name.split(".xlsx")[0]
 alignment_style = Alignment(horizontal='center', vertical='center')
 font_style_card = Font(bold=True, size=30)
 font_style_text = Font(bold=True, size=11)
@@ -36,11 +37,12 @@ ws.cell(row=3, column=1, value='전개')
 # 핸드 내용을 입력
 for col_idx, value in enumerate(sheet_name.split(), start=2):
     ws.cell(row=2, column=col_idx, value=value)
-    image_file_path = os.path.join(image_folder, f"{value}.png")
+    image_file_path = image_folder / f"{value}.png"
+    print(f"이미지 경로: {image_file_path}")
         # 이미지 파일이 존재하면 엑셀에 추가
     if os.path.exists(image_file_path):
         # 이미지 객체 생성
-        img = Image(image_file_path)
+        img = Image(str(image_file_path))
 
         # 이미지 크기 조정
         cell_width = 15
@@ -74,11 +76,11 @@ for i, data in enumerate(big_data):
     max_col = 15
     
     for idx, value in enumerate(data):
-        image_file_path = os.path.join(image_folder, f"{value}.png")
+        image_file_path = image_folder / f"{value}.png"
         # 이미지 파일이 존재하면 엑셀에 추가
         if os.path.exists(image_file_path):
             # 이미지 객체 생성
-            img = Image(image_file_path)
+            img = Image(str(image_file_path))
 
             # 이미지 크기 조정
             cell_width = 15
@@ -109,7 +111,7 @@ for row in range(3, ws.max_row + 5):
     if row > ws.max_row or row % 2 != 0:
         ws.row_dimensions[row].height = 130
 ws.row_dimensions[2].height = 130
-ws.cell(row=ws.max_row+1, column=1, value='결과물')
+ws.cell(row=ws.max_row+1, column=1, value='결과')
 
 # 폰트 조정
 for enu, row in enumerate(ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column), start=1):
