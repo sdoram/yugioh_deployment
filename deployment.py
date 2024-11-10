@@ -3,7 +3,7 @@
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
-from openpyxl.styles import Alignment, Font
+from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from pathlib import Path
 
 file_name = input("수정할 파일명을 입력하세요 (확장자 제외): ") + ".xlsx"
@@ -12,6 +12,18 @@ image_folder = Path.cwd() / "이미지" / file_name.split(".xlsx")[0]
 alignment_style = Alignment(horizontal='center', vertical='center')
 font_style_card = Font(bold=True, size=30)
 font_style_text = Font(bold=True, size=11)
+
+extra_color = PatternFill(start_color="B3CEFB", end_color="B3CEFB", fill_type="solid")
+monster_color = PatternFill(start_color="FFC599", end_color="FFC599", fill_type="solid")
+magic_trap_color = PatternFill(start_color="A6E3B7", end_color="A6E3B7", fill_type="solid")
+tomb_color = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+
+border_style = Border(
+    left=Side(border_style="thin", color="000000"),
+    right=Side(border_style="thin", color="000000"),
+    top=Side(border_style="thin", color="000000"),
+    bottom=Side(border_style="thin", color="000000")
+)
 
 try:
     # 기존 파일 열기
@@ -70,7 +82,10 @@ while True:
 
 # O열 넘기는지 체크용
 current_location = big_data[0].index('>')
-next_location = big_data[0].index('>', current_location+1)
+try:
+    next_location = big_data[0].index('>', current_location+1)
+except ValueError:
+    next_location = current_location
 
 for i, data in enumerate(big_data):
     if i == 0:
@@ -126,7 +141,35 @@ for row in range(3, ws.max_row + 5):
     if row > ws.max_row or row % 2 != 0:
         ws.row_dimensions[row].height = 130
 ws.row_dimensions[2].height = 130
+
+# 결과 필드 만들기
+
 ws.cell(row=ws.max_row+1, column=1, value='결과')
+result_row = ws.max_row
+# 엑스트라 몬스터
+ws.cell(row=result_row, column=4).fill = extra_color
+ws.cell(row=result_row, column=4).border = border_style
+ws.cell(row=result_row, column=6).fill = extra_color
+ws.cell(row=result_row, column=6).border = border_style
+# 몬스터
+for col in ws.iter_rows(min_row=result_row+1, max_row=result_row+1, min_col=3, max_col=7):
+    for cell in col:
+        cell.fill = monster_color
+        cell.border = border_style
+# 마함
+for col in ws.iter_rows(min_row=result_row+2, max_row=result_row+2, min_col=3, max_col=7):
+    for cell in col:
+        cell.fill = magic_trap_color
+        cell.border = border_style
+# 필마
+ws.cell(row=result_row+1, column=2).fill = magic_trap_color
+ws.cell(row=result_row+1, column=2).border = border_style
+
+# 묘지&제외
+for row in ws.iter_rows(min_row=result_row, max_row=result_row+1, min_col=8, max_col=8):
+    for cell in row:
+        cell.fill = tomb_color
+        cell.border = border_style
 
 # 폰트 조정
 for enu, row in enumerate(ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column), start=1):
