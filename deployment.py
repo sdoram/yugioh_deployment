@@ -5,7 +5,6 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment, Font
 from pathlib import Path
-import os
 
 file_name = input("수정할 파일명을 입력하세요 (확장자 제외): ") + ".xlsx"
 big_data = [[], []]
@@ -40,7 +39,7 @@ for col_idx, value in enumerate(sheet_name.split(), start=2):
     image_file_path = image_folder / f"{value}.png"
     print(f"이미지 경로: {image_file_path}")
         # 이미지 파일이 존재하면 엑셀에 추가
-    if os.path.exists(image_file_path):
+    if image_file_path.exists():
         # 이미지 객체 생성
         img = Image(str(image_file_path))
 
@@ -78,7 +77,7 @@ for i, data in enumerate(big_data):
     for idx, value in enumerate(data):
         image_file_path = image_folder / f"{value}.png"
         # 이미지 파일이 존재하면 엑셀에 추가
-        if os.path.exists(image_file_path):
+        if image_file_path.exists():
             # 이미지 객체 생성
             img = Image(str(image_file_path))
 
