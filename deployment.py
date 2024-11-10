@@ -7,6 +7,7 @@ from openpyxl.styles import Alignment, Font
 import os
 
 file_name = input("수정할 파일명을 입력하세요 (확장자 제외): ") + ".xlsx"
+big_data = [[], []]
 image_folder = f"C:/Users/Administrator/Desktop/yugioh_deployment/이미지/{file_name.split('.xlsx')[0]}/"
 alignment_style = Alignment(horizontal='center', vertical='center')
 font_style_card = Font(bold=True, size=30)
@@ -33,9 +34,9 @@ ws.cell(row=1, column=1, value=sheet_name)
 ws.cell(row=2, column=1, value='핸드')
 ws.cell(row=3, column=1, value='전개')
 # 핸드 내용을 입력
-for col_idx, hand in enumerate(sheet_name.split(), start=2):
-    ws.cell(row=2, column=col_idx, value=hand)
-    image_file_path = os.path.join(image_folder, f"{hand}.png")
+for col_idx, value in enumerate(sheet_name.split(), start=2):
+    ws.cell(row=2, column=col_idx, value=value)
+    image_file_path = os.path.join(image_folder, f"{value}.png")
         # 이미지 파일이 존재하면 엑셀에 추가
     if os.path.exists(image_file_path):
         # 이미지 객체 생성
@@ -53,26 +54,27 @@ for col_idx, hand in enumerate(sheet_name.split(), start=2):
     else:
         print(f"이미지를 찾을 수 없습니다: {image_file_path}")
 
-# 0번에 카드명, 1번에 방법
-data = [[], []]
 while True:
-    t = input("카드명과 방법을 입력하세요 (종료하려면 빈 입력): ").split()
-    if not t:
+    # 0번에 카드명, 1번에 방법
+    data = input("카드명과 방법을 입력하세요 (종료하려면 빈 입력): ").split()
+    if not data:
         break
-    for idx, value in enumerate(t):
+    for idx, value in enumerate(data):
         if idx % 2 == 0:
-            data[0].append(value)
+            big_data[0].append(value)
         else:
-            data[1].append(value)
-    data[0].append(">")
-    data[1].append("")
+            big_data[1].append(value)
+    big_data[0].append(">")
+    big_data[1].append("")
 
 
-row_idx, col_idx = 3, 2
-max_col = 15
-for col_data in data:
-    for row_data in col_data:
-        image_file_path = os.path.join(image_folder, f"{row_data}.png")
+for i, data in enumerate(big_data):
+    if i == 0:
+        row_idx, col_idx = 3, 2
+    max_col = 15
+    
+    for idx, value in enumerate(data):
+        image_file_path = os.path.join(image_folder, f"{value}.png")
         # 이미지 파일이 존재하면 엑셀에 추가
         if os.path.exists(image_file_path):
             # 이미지 객체 생성
@@ -89,7 +91,7 @@ for col_data in data:
             ws.add_image(img, cell_location)
         else:
             print(f"이미지를 찾을 수 없습니다: {image_file_path}")
-            ws.cell(row=row_idx, column=col_idx, value=row_data)
+            ws.cell(row=row_idx, column=col_idx, value=value)
         
         col_idx += 1
         if col_idx > max_col:
@@ -103,9 +105,11 @@ for col_letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
     ws.column_dimensions[col_letter].width = 15
 
 # 카드 이미지 들어갈 위치만 130사이즈로 조절
-for row in range(3, ws.max_row + 1, 2):
-    ws.row_dimensions[row].height = 130
+for row in range(3, ws.max_row + 5):
+    if row > ws.max_row or row % 2 != 0:
+        ws.row_dimensions[row].height = 130
 ws.row_dimensions[2].height = 130
+ws.cell(row=ws.max_row+1, column=1, value='결과물')
 
 # 폰트 조정
 for enu, row in enumerate(ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column), start=1):
