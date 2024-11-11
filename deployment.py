@@ -231,16 +231,18 @@ if q == "예":
     result_data[1].append([result_row+2, 8])
     
     # 패 상태 입력
-    hand_count = int(input("남은 패 매수를 입력해주세요 (넘어가려면 빈 입력): "))
-    for i in range(1, hand_count+1):
-        result = input("패에 특정 카드가 존재한다면 입력해주세요 (넘어가려면 빈 입력): ")
-        if not result:
-            for j in range(1, hand_count-(i-1)+1):
-                result_data[0].append("패")
-                result_data[1].append([result_row+3, 2+j+(i-1)])
-            break
-        result_data[0].append(result)
-        result_data[1].append([result_row+3, 2+i])
+    result = input("남은 패 매수를 입력해주세요 (넘어가려면 빈 입력): ")
+    if result:
+        hand_count = int(result)
+        for i in range(1, hand_count+1):
+            result = input("패에 특정 카드가 존재한다면 입력해주세요 (넘어가려면 빈 입력): ")
+            if not result:
+                for j in range(1, hand_count-(i-1)+1):
+                    result_data[0].append("패")
+                    result_data[1].append([result_row+3, 2+j+(i-1)])
+                break
+            result_data[0].append(result)
+            result_data[1].append([result_row+3, 2+i])
             
     for i, data in enumerate(result_data[0]):
         row_idx, col_idx = result_data[1][i]
