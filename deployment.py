@@ -1,4 +1,5 @@
-# 상대턴 움직임 만들기
+# 테스트시 P열까지 넘어가는 경우 발생 해결 필요
+# 테스트시 상대 전개 예시에서 방법만 따로 노는 경우 발견
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
@@ -99,8 +100,18 @@ def insert_deployment(ID_row_idx, ID_col_idx):
                     if not insert_image(ID_value, ID_cell_location):
                         ws.cell(row=ID_row_idx, column=ID_col_idx, value=ID_value)
             ID_col_idx += 1
-            # 첫번째 for문이 끝나고 방법에 해당하는 반복문이 진행되기 전에 row, col의 정보를 갱신
-        ID_row_idx, ID_col_idx = start_ID_row_idx+1, 2
+        # 첫번째 for문이 끝나고 방법에 해당하는 반복문이 진행되기 전에 row, col의 정보를 갱신
+        if ID_i == 0:
+            ID_row_idx, ID_col_idx = start_ID_row_idx+1, 2
+    for ID_row in range(start_ID_row_idx, ID_row_idx, 2):
+        ws.row_dimensions[ID_row].height = 130
+    for ID_enu, ID_row in enumerate(ws.iter_rows(min_row=start_ID_row_idx, max_row=ID_row_idx, min_col=1, max_col=ws.max_column), start=1):
+        for ID_cell in ID_row:
+            ID_cell.alignment = alignment_style
+            if ID_enu % 2 == 0:
+                ID_cell.font = font_style_text
+            else:
+                ID_cell.font = font_style_card
 
 
 try:
@@ -261,21 +272,21 @@ if q:
 for col_letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
     ws.column_dimensions[col_letter].width = 15
 
-# 수정 필요
 # 카드 이미지 들어갈 위치만 130사이즈로 조절
-for row in range(3, ws.max_row + 5):
-    if row > ws.max_row or row % 2 != 0:
-        ws.row_dimensions[row].height = 130
+for row in range(result_row, result_row + 4):
+    ws.row_dimensions[row].height = 130
 ws.row_dimensions[2].height = 130
-
-# 폰트 조정
-for enu, row in enumerate(ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column), start=1):
+for enu, row in enumerate(ws.iter_rows(min_row=result_row, max_row=result_row + 5, min_col=1, max_col=ws.max_column), start=1):
     for cell in row:
         cell.alignment = alignment_style
-        if enu >= 4 and enu % 2 == 0:
+        if enu == 5:
             cell.font = font_style_text
         else:
             cell.font = font_style_card
+for row in ws.iter_rows(min_row=1, max_row=2, min_col=1, max_col=ws.max_column):
+    for cell in row:
+        cell.alignment = alignment_style
+        cell.font = font_style_card
 
 # 1행 수정
 ws.merge_cells('A1:O1')
