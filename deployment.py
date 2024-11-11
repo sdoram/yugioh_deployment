@@ -259,5 +259,9 @@ for enu, row in enumerate(ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1,
         else:
             cell.font = font_style_card
 
+# 1행 수정
+ws.merge_cells('A1:O1')
+ws['A1'].alignment = Alignment(horizontal='left', vertical='center')
+
 wb.save(file_name)
 print("저장 완료")
