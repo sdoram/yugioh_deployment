@@ -1,5 +1,3 @@
-# A1 조정
-# 패에 남은 특정 카드가 왜 있는지 설명 넣기
 # 상대턴 움직임 만들기
 
 from openpyxl import Workbook, load_workbook
@@ -170,8 +168,8 @@ for row in ws.iter_rows(min_row=result_row, max_row=result_row+1, min_col=8, max
         cell.border = border_style
 
 # 결과물 이미지 붙이기
-q = input("결과 필드를 만드시겠습니까? 예 or 아니오: ")
-if q == "예":
+q = input("결과 필드를 만드시겠습니까? (넘어가려면 빈 입력)")
+if q:
     result_data = [[], []]
     for i in range(2):
         if i == 0:
@@ -233,17 +231,27 @@ if q == "예":
     # 패 상태 입력
     result = input("남은 패 매수를 입력해주세요 (넘어가려면 빈 입력): ")
     if result:
+        hand_result = [[], []]
         hand_count = int(result)
         for i in range(1, hand_count+1):
-            result = input("패에 특정 카드가 존재한다면 입력해주세요 (넘어가려면 빈 입력): ")
+            result = input("패에 특정 카드가 존재한다면 카드명과 방법을 입력해주세요 (넘어가려면 빈 입력): ").split()
             if not result:
                 for j in range(1, hand_count-(i-1)+1):
-                    result_data[0].append("패")
-                    result_data[1].append([result_row+3, 2+j+(i-1)])
+                    hand_result[0].append("패")
+                    hand_result[1].append('')
                 break
-            result_data[0].append(result)
-            result_data[1].append([result_row+3, 2+i])
-            
+            hand_result[0].append(result[0])
+            hand_result[1].append(''.join(result[1:]))
+        
+        for i, data in enumerate(hand_result):
+            for j, value in enumerate(data, start=3):
+                row_idx, col_idx = result_row+3, j
+                cell_location = f"{chr(65 + col_idx - 1)}{row_idx}"
+                if not insert_image(value, cell_location):
+                    ws.cell(row=row_idx, column=col_idx, value=value)
+                if i:
+                    ws.cell(row=result_row+4, column=j, value=value)
+                    
     for i, data in enumerate(result_data[0]):
         row_idx, col_idx = result_data[1][i]
         cell_location = f"{chr(65 + col_idx - 1)}{row_idx}"
