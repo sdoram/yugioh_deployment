@@ -7,7 +7,6 @@ from pathlib import Path
 from itertools import count
 
 file_name = input("수정할 파일명을 입력하세요 (확장자 제외): ") + ".xlsx"
-big_data = [[], []]
 image_folder = Path.cwd() / "이미지" / file_name.split(".xlsx")[0]
 alignment_style = Alignment(horizontal="center", vertical="center")
 font_style_card = Font(bold=True, size=30)
@@ -42,6 +41,67 @@ def insert_image(card_image, location):
     print(f"이미지를 찾을 수 없습니다: {image_file_path}")
     return False
 
+def name_and_way():
+    big_data = [[], []]
+    while True:
+        # 0번에 카드명, 1번에 방법
+        name_way_data = input("카드명과 방법을 입력하세요 (종료하려면 빈 입력): ").split()
+        if not name_way_data:
+            break
+        for name_way_idx, name_way_value in enumerate(name_way_data):
+            if name_way_idx % 2 == 0:
+                big_data[0].append(name_way_value)
+            else:
+                big_data[1].append(name_way_value)
+        big_data[0].append(">")
+        big_data[1].append(" ")
+    return big_data
+
+def insert_deployment(ID_row_idx, ID_col_idx):
+    start_ID_row_idx = ID_row_idx
+    big_data = name_and_way()
+    # O열 넘기는지 체크용
+    try:
+        ID_current_location = big_data[0].index(">")
+        try:
+            ID_next_location = big_data[0].index(">", ID_current_location+1)
+        except ValueError:
+            ID_next_location = ID_current_location
+    except ValueError:
+        pass
+
+    for ID_i, ID_data in enumerate(big_data):        
+        for ID_idx, ID_value in enumerate(ID_data):
+            if ID_idx+1 != len(ID_data):
+                if ID_value == ">" and ID_col_idx + ID_next_location - ID_current_location > 16:
+                    ID_col_idx = 1
+                    ID_row_idx += 2
+                    ID_current_location = ID_next_location
+                    try:
+                        ID_next_location = big_data[0].index(">", ID_current_location+1)
+                    except ValueError:
+                        ID_next_location = ID_current_location
+
+                    ID_cell_location = f"{chr(65 + ID_col_idx - 1)}{ID_row_idx}"
+                    if not insert_image(ID_value, ID_cell_location):
+                        ws.cell(row=ID_row_idx, column=ID_col_idx, value=ID_value)
+                else:
+                    if ID_i == 1 and ID_value == " " and ID_col_idx + ID_next_location - ID_current_location > 16:
+                        ID_col_idx = 1
+                        ID_row_idx += 2
+                        ID_current_location = ID_next_location
+                        try:
+                            ID_next_location = big_data[0].index(">", ID_current_location+1)
+                        except ValueError:
+                            ID_next_location = ID_current_location
+                            
+                    ID_cell_location = f"{chr(65 + ID_col_idx - 1)}{ID_row_idx}"
+                    if not insert_image(ID_value, ID_cell_location):
+                        ws.cell(row=ID_row_idx, column=ID_col_idx, value=ID_value)
+            ID_col_idx += 1
+            # 첫번째 for문이 끝나고 방법에 해당하는 반복문이 진행되기 전에 row, col의 정보를 갱신
+        ID_row_idx, ID_col_idx = start_ID_row_idx+1, 2
+
 
 try:
     # 기존 파일 열기
@@ -69,74 +129,7 @@ for col_idx, value in enumerate(sheet_name.split(), start=2):
     if not insert_image(value, cell_location):
         ws.cell(row=2, column=col_idx, value=value)
 
-while True:
-    # 0번에 카드명, 1번에 방법
-    data = input("카드명과 방법을 입력하세요 (종료하려면 빈 입력): ").split()
-    if not data:
-        break
-    for idx, value in enumerate(data):
-        if idx % 2 == 0:
-            big_data[0].append(value)
-        else:
-            big_data[1].append(value)
-    big_data[0].append(">")
-    big_data[1].append(" ")
-
-# O열 넘기는지 체크용
-try:
-    current_location = big_data[0].index(">")
-    try:
-        next_location = big_data[0].index(">", current_location+1)
-    except ValueError:
-        next_location = current_location
-except ValueError:
-    pass
-
-for i, data in enumerate(big_data):
-    if i == 0:
-        row_idx, col_idx = 3, 2
-    max_col = 15
-    
-    for idx, value in enumerate(data):
-        if idx+1 != len(data):
-            if value == ">" and col_idx + next_location - current_location > 16:
-                col_idx = 1
-                row_idx += 2
-                current_location = next_location
-                try:
-                    next_location = big_data[0].index(">", current_location+1)
-                except ValueError:
-                    next_location = current_location
-
-                cell_location = f"{chr(65 + col_idx - 1)}{row_idx}"
-                if not insert_image(value, cell_location):
-                    ws.cell(row=row_idx, column=col_idx, value=value)
-            else:
-                if i == 1 and value == " " and col_idx + next_location - current_location > 16:
-                    col_idx = 1
-                    row_idx += 2
-                    current_location = next_location
-                    try:
-                        next_location = big_data[0].index(">", current_location+1)
-                    except ValueError:
-                        next_location = current_location
-                        
-                cell_location = f"{chr(65 + col_idx - 1)}{row_idx}"
-                if not insert_image(value, cell_location):
-                    ws.cell(row=row_idx, column=col_idx, value=value)
-        col_idx += 1
-    # 첫번째 for문이 끝나고 방법에 해당하는 반복문이 진행되기 전에 row, col의 정보를 갱신
-    row_idx, col_idx = 4, 2
-
-    # 열의 너비를 15로 설정
-for col_letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-    ws.column_dimensions[col_letter].width = 15
-
-# 카드 이미지 들어갈 위치만 130사이즈로 조절
-for row in range(3, ws.max_row + 5):
-    if row > ws.max_row or row % 2 != 0:
-        ws.row_dimensions[row].height = 130
-ws.row_dimensions[2].height = 130
+insert_deployment(3, 2)
 
 # 결과 필드 만들기
 ws.cell(row=ws.max_row+1, column=1, value="결과")
@@ -257,7 +250,24 @@ if q:
         cell_location = f"{chr(65 + col_idx - 1)}{row_idx}"
         if not insert_image(data, cell_location):
             ws.cell(row=row_idx, column=col_idx, value=data)
+            
+q = input("상대 턴 움직임을 만드시겠습니까? (넘어가려면 빈 입력): ")
+if q:
+    ws.cell(row=result_row+5, column=1, value="상대")
+    insert_deployment(result_row+5, 2)
         
+        
+# 열의 너비를 15로 설정
+for col_letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+    ws.column_dimensions[col_letter].width = 15
+
+# 수정 필요
+# 카드 이미지 들어갈 위치만 130사이즈로 조절
+for row in range(3, ws.max_row + 5):
+    if row > ws.max_row or row % 2 != 0:
+        ws.row_dimensions[row].height = 130
+ws.row_dimensions[2].height = 130
+
 # 폰트 조정
 for enu, row in enumerate(ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column), start=1):
     for cell in row:
