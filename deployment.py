@@ -1,3 +1,5 @@
+# A1 조정
+# 패에 남은 특정 카드가 왜 있는지 설명 넣기
 # 상대턴 움직임 만들기
 
 from openpyxl import Workbook, load_workbook
@@ -171,7 +173,6 @@ for row in ws.iter_rows(min_row=result_row, max_row=result_row+1, min_col=8, max
 q = input("결과 필드를 만드시겠습니까? 예 or 아니오: ")
 if q == "예":
     result_data = [[], []]
-    # 엑존
     for i in range(2):
         if i == 0:
             result = input("왼쪽 엑스트라 몬스터 존에 있는 카드를 입력해주세요 (넘어가려면 빈 입력): ")
@@ -200,6 +201,14 @@ if q == "예":
     if result:
         result_data[0].append(result)
         result_data[1].append([result_row+1, 2])
+        
+    result = input("엑스트라 덱에 있는 카드를 입력해주세요 (넘어가려면 빈 입력): ")
+    if result:
+        result_data[0].append(result)
+        result_data[1].append([result_row+2, 2])
+    else:
+        result_data[0].append("패")
+        result_data[1].append([result_row+2, 2])
     
     for i in count():
         result = input("제외 존에 보여주고 싶은 카드를 입력해주세요 (넘어가려면 빈 입력): ")
@@ -216,6 +225,22 @@ if q == "예":
         else:
             result_data[0].append(result)
             result_data[1].append([result_row+1, 8+i])
+            
+    # 덱 표시
+    result_data[0].append("패")
+    result_data[1].append([result_row+2, 8])
+    
+    # 패 상태 입력
+    hand_count = int(input("남은 패 매수를 입력해주세요 (넘어가려면 빈 입력): "))
+    for i in range(1, hand_count+1):
+        result = input("패에 특정 카드가 존재한다면 입력해주세요 (넘어가려면 빈 입력): ")
+        if not result:
+            for j in range(1, hand_count-(i-1)+1):
+                result_data[0].append("패")
+                result_data[1].append([result_row+3, 2+j+(i-1)])
+            break
+        result_data[0].append(result)
+        result_data[1].append([result_row+3, 2+i])
             
     for i, data in enumerate(result_data[0]):
         row_idx, col_idx = result_data[1][i]
