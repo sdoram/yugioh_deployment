@@ -1,5 +1,5 @@
-# 테스트시 P열까지 넘어가는 경우 발생 해결 필요
-# 테스트시 상대 전개 예시에서 방법만 따로 노는 경우 발견
+# 함수로 모듈화하기
+# 함수에 docstring 작성
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
@@ -48,6 +48,11 @@ def name_and_way():
         # 0번에 카드명, 1번에 방법
         name_way_data = input("카드명과 방법을 입력하세요 (종료하려면 빈 입력): ").split()
         if not name_way_data:
+            try:
+                big_data[0].pop()
+                big_data[1].pop()
+            except IndexError:
+                pass
             break
         for name_way_idx, name_way_value in enumerate(name_way_data):
             if name_way_idx % 2 == 0:
@@ -56,53 +61,27 @@ def name_and_way():
                 big_data[1].append(name_way_value)
         big_data[0].append(">")
         big_data[1].append(" ")
+        print(big_data)
     return big_data
 
 def insert_deployment(ID_row_idx, ID_col_idx):
     start_ID_row_idx = ID_row_idx
     big_data = name_and_way()
-    # O열 넘기는지 체크용
-    try:
-        ID_current_location = big_data[0].index(">")
-        try:
-            ID_next_location = big_data[0].index(">", ID_current_location+1)
-        except ValueError:
-            ID_next_location = ID_current_location
-    except ValueError:
-        pass
 
-    for ID_i, ID_data in enumerate(big_data):        
-        for ID_idx, ID_value in enumerate(ID_data):
-            if ID_idx+1 != len(ID_data):
-                if ID_value == ">" and ID_col_idx + ID_next_location - ID_current_location > 16:
-                    ID_col_idx = 1
-                    ID_row_idx += 2
-                    ID_current_location = ID_next_location
-                    try:
-                        ID_next_location = big_data[0].index(">", ID_current_location+1)
-                    except ValueError:
-                        ID_next_location = ID_current_location
+    for ID_i, ID_data in enumerate(big_data):
+        for ID_idx ,ID_value in enumerate(ID_data):
+            if ((ID_value == ">" or ID_value == ' ') and find_location(ID_idx, ID_col_idx, ID_value, ID_data, 15)) or ID_col_idx > 15:
+                ID_col_idx = 1
+                ID_row_idx += 2
 
-                    ID_cell_location = f"{chr(65 + ID_col_idx - 1)}{ID_row_idx}"
-                    if not insert_image(ID_value, ID_cell_location):
-                        ws.cell(row=ID_row_idx, column=ID_col_idx, value=ID_value)
-                else:
-                    if ID_i == 1 and ID_value == " " and ID_col_idx + ID_next_location - ID_current_location > 16:
-                        ID_col_idx = 1
-                        ID_row_idx += 2
-                        ID_current_location = ID_next_location
-                        try:
-                            ID_next_location = big_data[0].index(">", ID_current_location+1)
-                        except ValueError:
-                            ID_next_location = ID_current_location
-                            
-                    ID_cell_location = f"{chr(65 + ID_col_idx - 1)}{ID_row_idx}"
-                    if not insert_image(ID_value, ID_cell_location):
-                        ws.cell(row=ID_row_idx, column=ID_col_idx, value=ID_value)
+            ID_cell_location = f"{chr(65 + ID_col_idx - 1)}{ID_row_idx}"
+            if not insert_image(ID_value, ID_cell_location):
+                ws.cell(row=ID_row_idx, column=ID_col_idx, value=ID_value)
             ID_col_idx += 1
         # 첫번째 for문이 끝나고 방법에 해당하는 반복문이 진행되기 전에 row, col의 정보를 갱신
         if ID_i == 0:
             ID_row_idx, ID_col_idx = start_ID_row_idx+1, 2
+            
     for ID_row in range(start_ID_row_idx, ID_row_idx, 2):
         ws.row_dimensions[ID_row].height = 130
     for ID_enu, ID_row in enumerate(ws.iter_rows(min_row=start_ID_row_idx, max_row=ID_row_idx, min_col=1, max_col=ws.max_column), start=1):
@@ -113,6 +92,20 @@ def insert_deployment(ID_row_idx, ID_col_idx):
             else:
                 ID_cell.font = font_style_card
 
+def find_location(current_target_idx=int, current_col_idx=int, target=any, target_list=list, search_range=int):
+    '''
+    현재 리스트 위치, 현재 column 위치, 찾을 내용, 리스트, 찾을 범위
+    target_list에서 다음 target이 search_range 이내에 존재하는지 파악 후
+    다음 target에서 column위치가 search_range를 넘으면 True, 아니면 False 반환
+    '''
+    try:
+        next_target_idx = target_list.index(target, current_target_idx + 1) - 1
+        if next_target_idx - current_target_idx + current_col_idx > search_range:
+            return True
+    except ValueError:
+        if len(target_list) - current_target_idx + current_col_idx > search_range:
+            return True
+    return False
 
 try:
     # 기존 파일 열기
@@ -266,7 +259,6 @@ q = input("상대 턴 움직임을 만드시겠습니까? (넘어가려면 빈 �
 if q:
     ws.cell(row=result_row+5, column=1, value="상대")
     insert_deployment(result_row+5, 2)
-        
         
 # 열의 너비를 15로 설정
 for col_letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
