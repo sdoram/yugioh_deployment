@@ -1,5 +1,6 @@
 # 함수로 모듈화하기
 # 함수에 docstring 작성
+# 불필요한 코드 제거
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
@@ -26,20 +27,22 @@ border_style = Border(
 )
 
 def insert_image(card_image, location):
-    image_file_path = image_folder / f"{card_image}.png"
-    # 이미지 파일이 존재하면 엑셀에 추가
-    if image_file_path.exists():
-        # 이미지 객체 생성
-        img = Image(str(image_file_path))
+    image_extensions = [".png", ".jpg", ".jpeg"]
+    for ext in image_extensions:
+        image_file_path = image_folder / f"{card_image}{ext}"
+        # 이미지 파일이 존재하면 엑셀에 추가
+        if image_file_path.exists():
+            # 이미지 객체 생성
+            img = Image(str(image_file_path))
 
-        # 이미지 크기 조정
-        cell_width = 15
-        cell_height = 130
-        img.width = cell_width * 8
-        img.height = cell_height * 1.33
-        ws.add_image(img, location)
-        return True
-    print(f"이미지를 찾을 수 없습니다: {image_file_path}")
+            # 이미지 크기 조정
+            cell_width = 15
+            cell_height = 130
+            img.width = cell_width * 8
+            img.height = cell_height * 1.33
+            ws.add_image(img, location)
+            return True
+    print(f"이미지를 찾을 수 없습니다: {card_image}")
     return False
 
 def name_and_way():
@@ -58,10 +61,9 @@ def name_and_way():
             if name_way_idx % 2 == 0:
                 big_data[0].append(name_way_value)
             else:
-                big_data[1].append(name_way_value)
+                big_data[1].append(name_way_value.replace("_", " "))
         big_data[0].append(">")
         big_data[1].append(" ")
-        print(big_data)
     return big_data
 
 def insert_deployment(ID_row_idx, ID_col_idx):
