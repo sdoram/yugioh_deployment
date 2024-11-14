@@ -1,8 +1,8 @@
 # 함수로 모듈화하기
 # 함수에 docstring 작성
 # 불필요한 코드 제거
-# 상대턴 움직임 O열 이전에 줄바꿈 확인 수정 필요
 # 전개 텍스트 읽어서 만드는 기능
+# 결과에 ">" 대신 "and", "or" 선택 기능
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
@@ -98,7 +98,16 @@ def insert_deployment(ID_row_idx, ID_col_idx):
 
 def find_location(current_target_idx=int, current_col_idx=int, target=any, target_list=list, search_range=int):
     '''
-    현재 리스트 위치, 현재 column 위치, 찾을 내용, 리스트, 찾을 범위
+    current_target_idx = 앞선 column 중 가장 가까운 target 위치
+    
+    current_col_idx = 현재 column의 위치
+    
+    target = 찾을 내용
+    
+    target_list = target이 담겨있는 list의 내용
+    
+    search_range = target이 몇 column뒤 까지 있는지 찾을 범위
+    
     target_list에서 다음 target이 search_range 이내에 존재하는지 파악 후
     다음 target에서 column위치가 search_range를 넘으면 True, 아니면 False 반환
     '''
@@ -107,7 +116,8 @@ def find_location(current_target_idx=int, current_col_idx=int, target=any, targe
         if next_target_idx - current_target_idx + current_col_idx > search_range:
             return True
     except ValueError:
-        if len(target_list) - current_target_idx + current_col_idx > search_range:
+        # index와 len의 차이를 보완하기 위해 -1 추가
+        if len(target_list)-1 - current_target_idx + current_col_idx > search_range:
             return True
     return False
 
@@ -122,10 +132,6 @@ except FileNotFoundError:
 
 # 기존 시트 선택 또는 새로운 시트 생성
 sheet_name = input("작성할 시트명을 입력하세요: ")
-# if sheet_name in wb.sheetnames:
-#     ws = wb[sheet_name]
-# else:
-#     ws = wb.create_sheet(sheet_name)
 if sheet_name in wb.sheetnames:
     wb.remove(wb[sheet_name])  # 기존 시트 삭제
     print(f"'{sheet_name}' 시트를 삭제하고 새로 생성합니다.")
@@ -141,6 +147,7 @@ for col_idx, value in enumerate(sheet_name.split(), start=2):
     if not insert_image(value, cell_location):
         ws.cell(row=2, column=col_idx, value=value)
 
+# 전개
 insert_deployment(3, 2)
 
 # 결과 필드 만들기
