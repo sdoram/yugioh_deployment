@@ -121,11 +121,15 @@ except FileNotFoundError:
     print(f"'{file_name}' 파일이 없어 새 파일을 생성합니다.")
 
 # 기존 시트 선택 또는 새로운 시트 생성
-sheet_name = input("수정할 시트명을 입력하세요: ")
+sheet_name = input("작성할 시트명을 입력하세요: ")
+# if sheet_name in wb.sheetnames:
+#     ws = wb[sheet_name]
+# else:
+#     ws = wb.create_sheet(sheet_name)
 if sheet_name in wb.sheetnames:
-    ws = wb[sheet_name]
-else:
-    ws = wb.create_sheet(sheet_name)
+    wb.remove(wb[sheet_name])  # 기존 시트 삭제
+    print(f"'{sheet_name}' 시트를 삭제하고 새로 생성합니다.")
+ws = wb.create_sheet(sheet_name)
     
 # 시트명을 A1에 입력
 ws.cell(row=1, column=1, value=sheet_name)
