@@ -1,6 +1,8 @@
 # 함수로 모듈화하기
 # 함수에 docstring 작성
 # 불필요한 코드 제거
+# 상대턴 움직임 O열 이전에 줄바꿈 확인 수정 필요
+# 전개 텍스트 읽어서 만드는 기능
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
@@ -237,19 +239,19 @@ if q:
             if not result:
                 for j in range(1, hand_count-(i-1)+1):
                     hand_result[0].append("패")
-                    hand_result[1].append('')
+                    hand_result[1].append(" ")
                 break
             hand_result[0].append(result[0])
-            hand_result[1].append(''.join(result[1:]))
+            hand_result[1].append(result[1].replace("_", " "))
         
         for i, data in enumerate(hand_result):
             for j, value in enumerate(data, start=3):
                 row_idx, col_idx = result_row+3, j
                 cell_location = f"{chr(65 + col_idx - 1)}{row_idx}"
-                if not insert_image(value, cell_location):
-                    ws.cell(row=row_idx, column=col_idx, value=value)
                 if i:
                     ws.cell(row=result_row+4, column=j, value=value)
+                elif not insert_image(value, cell_location):
+                    ws.cell(row=result_row+3, column=j, value=value)
                     
     for i, data in enumerate(result_data[0]):
         row_idx, col_idx = result_data[1][i]
