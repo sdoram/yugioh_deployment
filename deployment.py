@@ -2,7 +2,7 @@
 # 함수에 docstring 작성
 # 불필요한 코드 제거
 # 전개 텍스트 읽어서 만드는 기능
-# 결과에 ">" 대신 "and", "or" 선택 기능
+# 엔드 페이즈 전개
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
@@ -42,13 +42,17 @@ def name_and_way():
             except IndexError:
                 pass
             break
-        for name_way_idx, name_way_value in enumerate(name_way_data):
-            if name_way_idx % 2 == 0:
-                big_data[0].append(name_way_value)
-            else:
-                big_data[1].append(name_way_value.replace("_", " "))
-        big_data[0].append(">")
-        big_data[1].append(" ")
+        if name_way_data[0] == 'and' or name_way_data[0] == 'or':
+            big_data[0].pop()
+            big_data[0].append(name_way_data[0])
+        else:
+            for name_way_idx, name_way_value in enumerate(name_way_data):
+                if name_way_idx % 2 == 0:
+                    big_data[0].append(name_way_value)
+                else:
+                    big_data[1].append(name_way_value.replace("_", " "))
+            big_data[0].append(">")
+            big_data[1].append(" ")
     return big_data
 
 def insert_deployment(ID_row_idx, ID_col_idx):
@@ -57,7 +61,7 @@ def insert_deployment(ID_row_idx, ID_col_idx):
 
     for ID_i, ID_data in enumerate(big_data):
         for ID_idx ,ID_value in enumerate(ID_data):
-            if ((ID_value == ">" or ID_value == ' ') and find_location(ID_idx, ID_col_idx, ID_value, ID_data, 15)) or ID_col_idx > 15:
+            if ((ID_value == ">" or ID_value == ' ' or ID_value == "or" or ID_value == "and") and find_location(ID_idx, ID_col_idx, [">", " ", "or", "and"], ID_data, 15)) or ID_col_idx > 15:
                 ID_col_idx = 1
                 ID_row_idx += 2
 
@@ -79,29 +83,30 @@ def insert_deployment(ID_row_idx, ID_col_idx):
             else:
                 ID_cell.font = font_style_card
 
-def find_location(current_target_idx=int, current_col_idx=int, target=any, target_list=list, search_range=int):
+def find_location(current_target_idx=int, current_col_idx=int, targets=list, target_list=list, search_range=int):
     '''
     current_target_idx = 앞선 column 중 가장 가까운 target 위치
     
     current_col_idx = 현재 column의 위치
     
-    target = 찾을 내용
+    targets = 찾을 내용
     
     target_list = target이 담겨있는 list의 내용
     
     search_range = target이 몇 column뒤 까지 있는지 찾을 범위
     
-    target_list에서 다음 target이 search_range 이내에 존재하는지 파악 후
+    target_list에서 다음 targets 중 가장 가까운 target이 search_range 이내에 존재하는지 파악 후
     다음 target에서 column위치가 search_range를 넘으면 True, 아니면 False 반환
     '''
-    try:
-        next_target_idx = target_list.index(target, current_target_idx + 1) - 1
-        if next_target_idx - current_target_idx + current_col_idx > search_range:
-            return True
-    except ValueError:
-        # index와 len의 차이를 보완하기 위해 -1 추가
-        if len(target_list)-1 - current_target_idx + current_col_idx > search_range:
-            return True
+    next_target_idx_list = list()
+    next_target_idx_list.append(len(target_list)-1)
+    for target in targets:
+        try:
+            next_target_idx_list.append(target_list.index(target, current_target_idx + 1) - 1)
+        except ValueError:
+            pass
+    if min(next_target_idx_list) - current_target_idx + current_col_idx > search_range:
+        return True
     return False
 
 # 전개 텍스트 저장 함수
