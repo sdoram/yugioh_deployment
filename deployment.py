@@ -12,6 +12,8 @@ from itertools import count
 
 file_name = input("수정할 파일명을 입력하세요 (확장자 제외): ") + ".xlsx"
 image_folder = Path.cwd() / "이미지" / file_name.split(".xlsx")[0]
+my_deployment = list()
+my_deployment.append(file_name)
 alignment_style = Alignment(horizontal="center", vertical="center")
 font_style_card = Font(bold=True, size=30)
 font_style_text = Font(bold=True, size=11)
@@ -52,6 +54,7 @@ def name_and_way():
     while True:
         # 0번에 카드명, 1번에 방법
         name_way_data = input("카드명과 방법을 입력하세요 (종료하려면 빈 입력): ").split()
+        my_deployment.append(name_way_data)
         if not name_way_data:
             try:
                 big_data[0].pop()
@@ -121,6 +124,21 @@ def find_location(current_target_idx=int, current_col_idx=int, target=any, targe
             return True
     return False
 
+# 전개 텍스트 저장 함수
+def deployment_save(sheet, deployment, file_name):
+    """
+    
+    """
+    wb = load_workbook(file_name)
+    ws = wb[sheet]
+    for i in count(start=1):
+        if ws.cell(row=1, column=i).value is None:
+            ws.cell(row=1, column=i, value=sheet_name)
+            ws.cell(row=2, column=i, value=", ".join(map(str, deployment)))
+            break
+    wb.save(file_name)
+    return print(f"{chr(64 + i)}번에 {sheet_name} 전개 텍스트 저장")
+
 try:
     # 기존 파일 열기
     wb = load_workbook(file_name)
@@ -132,8 +150,10 @@ except FileNotFoundError:
 
 # 기존 시트 선택 또는 새로운 시트 생성
 sheet_name = input("작성할 시트명을 입력하세요: ")
+my_deployment.append(sheet_name)
 if sheet_name in wb.sheetnames:
-    wb.remove(wb[sheet_name])  # 기존 시트 삭제
+    # 기존 시트 삭제
+    wb.remove(wb[sheet_name])
     print(f"'{sheet_name}' 시트를 삭제하고 새로 생성합니다.")
 ws = wb.create_sheet(sheet_name)
     
@@ -181,38 +201,45 @@ for row in ws.iter_rows(min_row=result_row, max_row=result_row+1, min_col=8, max
 
 # 결과물 이미지 붙이기
 q = input("결과 필드를 만드시겠습니까? (넘어가려면 빈 입력)")
+my_deployment.append(q)
 if q:
     result_data = [[], []]
     for i in range(2):
         if i == 0:
             result = input("왼쪽 엑스트라 몬스터 존에 있는 카드를 입력해주세요 (넘어가려면 빈 입력): ")
+            my_deployment.append(result)
             if result:
                 result_data[0].append(result)
                 result_data[1].append([result_row, 4])
         else:
             result = input("오른쪽 엑스트라 몬스터 존에 있는 카드를 입력해주세요 (넘어가려면 빈 입력): ")
+            my_deployment.append(result)
             if result:
                 result_data[0].append(result)
                 result_data[1].append([result_row, 6])
                 
     for i in range(1, 6):
         result = input(f"{i}번 몬스터 존에 있는 카드를 입력해주세요 (넘어가려면 빈 입력): ")
+        my_deployment.append(result)
         if result:
             result_data[0].append(result)
             result_data[1].append([result_row+1, 2+i])
             
     for i in range(1, 6):
         result = input(f"{i}번 마법 & 함정 존에 있는 카드를 입력해주세요 (넘어가려면 빈 입력): ")
+        my_deployment.append(result)
         if result:
             result_data[0].append(result)
             result_data[1].append([result_row+2, 2+i])
     
     result = input("필드 마법 존에 있는 카드를 입력해주세요 (넘어가려면 빈 입력): ")
+    my_deployment.append(result)
     if result:
         result_data[0].append(result)
         result_data[1].append([result_row+1, 2])
         
     result = input("엑스트라 덱에 있는 카드를 입력해주세요 (넘어가려면 빈 입력): ")
+    my_deployment.append(result)
     if result:
         result_data[0].append(result)
         result_data[1].append([result_row+2, 2])
@@ -222,6 +249,7 @@ if q:
     
     for i in count():
         result = input("제외 존에 보여주고 싶은 카드를 입력해주세요 (넘어가려면 빈 입력): ")
+        my_deployment.append(result)
         if not result:
             break
         else:
@@ -230,6 +258,7 @@ if q:
         
     for i in count():
         result = input("묘지 존에 보여주고 싶은 카드를 입력해주세요 (넘어가려면 빈 입력): ")
+        my_deployment.append(result)
         if not result:
             break
         else:
@@ -242,11 +271,13 @@ if q:
     
     # 패 상태 입력
     result = input("남은 패 매수를 입력해주세요 (넘어가려면 빈 입력): ")
+    my_deployment.append(result)
     if result:
         hand_result = [[], []]
         hand_count = int(result)
         for i in range(1, hand_count+1):
             result = input("패에 특정 카드가 존재한다면 카드명과 방법을 입력해주세요 (넘어가려면 빈 입력): ").split()
+            my_deployment.append(result)
             if not result:
                 for j in range(1, hand_count-(i-1)+1):
                     hand_result[0].append("패")
@@ -271,6 +302,7 @@ if q:
             ws.cell(row=row_idx, column=col_idx, value=data)
             
 q = input("상대 턴 움직임을 만드시겠습니까? (넘어가려면 빈 입력): ")
+my_deployment.append(q)
 if q:
     ws.cell(row=result_row+5, column=1, value="상대")
     insert_deployment(result_row+5, 2)
@@ -299,5 +331,7 @@ for row in ws.iter_rows(min_row=1, max_row=2, min_col=1, max_col=ws.max_column):
 ws.merge_cells('A1:O1')
 ws['A1'].alignment = Alignment(horizontal='left', vertical='center')
 
-wb.save(file_name)
+wb.save(file_name)    
+
+deployment_save("Sheet", my_deployment, file_name)
 print("저장 완료")
