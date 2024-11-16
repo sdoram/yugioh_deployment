@@ -3,6 +3,7 @@
 # 불필요한 코드 제거
 # 전개 텍스트 읽어서 만드는 기능
 # 엔드 페이즈 전개
+# 전개 결과물 수비 표시 표현
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
@@ -57,6 +58,7 @@ def name_and_way():
 
 def insert_deployment(ID_row_idx, ID_col_idx):
     start_ID_row_idx = ID_row_idx
+    start_ID_col_idx = ID_col_idx
     big_data = name_and_way()
 
     for ID_i, ID_data in enumerate(big_data):
@@ -71,7 +73,7 @@ def insert_deployment(ID_row_idx, ID_col_idx):
             ID_col_idx += 1
         # 첫번째 for문이 끝나고 방법에 해당하는 반복문이 진행되기 전에 row, col의 정보를 갱신
         if ID_i == 0:
-            ID_row_idx, ID_col_idx = start_ID_row_idx+1, 2
+            ID_row_idx, ID_col_idx = start_ID_row_idx+1, start_ID_col_idx
             
     for ID_row in range(start_ID_row_idx, ID_row_idx, 2):
         ws.row_dimensions[ID_row].height = 130
@@ -183,6 +185,16 @@ for col_idx, value in enumerate(sheet_name.split(), start=2):
 # 전개
 insert_deployment(3, 2)
 
+# 엔드 페이즈
+q = deployment_input("엔드 페이즈 행동을 만드시겠습니까? (넘어가려면 빈 입력): " , 1)
+if q:
+    for i in count(start=1):
+        if ws.cell(row=ws.max_column, column=i).value is None:
+            ws.cell(row=ws.max_column, column=i+1, value=">")
+            ws.cell(row=ws.max_column+1, column=i+1, value="엔드 페이즈")
+            print(ws.max_column, i+2)
+            insert_deployment(ws.max_column, i+2)
+            break
 # 결과 필드 만들기
 ws.cell(row=ws.max_row+1, column=1, value="결과")
 result_row = ws.max_row
@@ -213,7 +225,7 @@ for row in ws.iter_rows(min_row=result_row, max_row=result_row+1, min_col=8, max
         cell.border = border_style
 
 # 결과물 이미지 붙이기
-q = deployment_input("결과 필드를 만드시겠습니까? (넘어가려면 빈 입력)", 1)
+q = deployment_input("결과 필드를 만드시겠습니까? (넘어가려면 빈 입력): ", 1)
 if q:
     result_data = [[], []]
     for i in range(2):
