@@ -111,12 +111,12 @@ def deployment_save(sheet, deployment):
     wb = load_workbook(deployment[0] + ".xlsx")
     ws = wb[sheet]
     for i in count(start=1):
-        if ws.cell(row=1, column=i).value is None:
+        check = ws.cell(row=1, column=i).value
+        if check is None or check == deployment[1]:
             ws.cell(row=1, column=i, value=sheet_name)
             ws.cell(row=2, column=i, value="\n".join(map(str, deployment)))
-            break
-    wb.save(file_name)
-    return print(f"{chr(64 + i)}번에 {sheet_name} 전개 텍스트 저장")
+            wb.save(file_name)
+            return print(f"{chr(64 + i)}번에 {sheet_name} 전개 텍스트 저장")
 
 def deployment_input(input_text, input_type):
     """
@@ -129,7 +129,6 @@ def deployment_input(input_text, input_type):
     else:
         return user_input.split()
 
-# file_name = input("수정할 파일명을 입력하세요 (확장자 제외): ") + ".xlsx"
 my_deployment = list()
 file_name = deployment_input("수정할 파일명을 입력하세요 (확장자 제외): ", 1) + ".xlsx"
 image_folder = Path.cwd() / "이미지" / file_name.split(".xlsx")[0]
