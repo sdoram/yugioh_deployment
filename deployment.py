@@ -2,7 +2,6 @@
 # 함수에 docstring 작성
 # 불필요한 코드 제거
 # 전개 텍스트 읽어서 만드는 기능
-# 엔드 페이즈 전개
 # 전개 결과물 수비 표시 표현
 
 from openpyxl import Workbook, load_workbook
@@ -49,7 +48,7 @@ def name_and_way():
         else:
             for name_way_idx, name_way_value in enumerate(name_way_data):
                 if name_way_idx % 2 == 0:
-                    big_data[0].append(name_way_value)
+                    big_data[0].append(name_way_value.replace("_", " "))
                 else:
                     big_data[1].append(name_way_value.replace("_", " "))
             big_data[0].append(">")
@@ -189,11 +188,10 @@ insert_deployment(3, 2)
 q = deployment_input("엔드 페이즈 행동을 만드시겠습니까? (넘어가려면 빈 입력): " , 1)
 if q:
     for i in count(start=1):
-        if ws.cell(row=ws.max_column, column=i).value is None:
-            ws.cell(row=ws.max_column, column=i+1, value=">")
-            ws.cell(row=ws.max_column+1, column=i+1, value="엔드 페이즈")
-            print(ws.max_column, i+2)
-            insert_deployment(ws.max_column, i+2)
+        if ws.cell(row=ws.max_row, column=i).value is None:
+            ws.cell(row=ws.max_row+1, column=1, value="엔드")
+            ws.cell(row=ws.max_row+1, column=1, value=" ")
+            insert_deployment(ws.max_row-1, 2)
             break
 # 결과 필드 만들기
 ws.cell(row=ws.max_row+1, column=1, value="결과")
@@ -297,7 +295,7 @@ if q:
                     hand_result[0].append("패")
                     hand_result[1].append(" ")
                 break
-            hand_result[0].append(result[0])
+            hand_result[0].append(result[0].replace("_", " "))
             hand_result[1].append(result[1].replace("_", " "))
         
         for i, data in enumerate(hand_result):
@@ -308,18 +306,19 @@ if q:
                     ws.cell(row=result_row+4, column=j, value=value)
                 elif not insert_image(value, cell_location):
                     ws.cell(row=result_row+3, column=j, value=value)
-                    
+
     for i, data in enumerate(result_data[0]):
         row_idx, col_idx = result_data[1][i]
         cell_location = f"{chr(65 + col_idx - 1)}{row_idx}"
         if not insert_image(data, cell_location):
             ws.cell(row=row_idx, column=col_idx, value=data)
             
+
 q = deployment_input("상대 턴 움직임을 만드시겠습니까? (넘어가려면 빈 입력): ", 1)
 if q:
     ws.cell(row=result_row+5, column=1, value="상대")
     insert_deployment(result_row+5, 2)
-        
+
 # 열의 너비를 15로 설정
 for col_letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
     ws.column_dimensions[col_letter].width = 15
