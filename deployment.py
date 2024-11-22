@@ -142,7 +142,7 @@ def deployment_save(sheet, deployment):
         if check is None or check == deployment[1]:
             ws.cell(row=1, column=i, value=sheet_name)
             ws.cell(row=2, column=i, value="\n".join(map(str, deployment)))
-            wb.save(file_name)
+            wb.save(file_path)
             return print(f"{chr(64 + i)}번에 {sheet_name} 전개 텍스트 저장")
 
 def deployment_input(input_text, input_type, save_list):
