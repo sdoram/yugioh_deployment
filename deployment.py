@@ -135,7 +135,7 @@ def deployment_save(sheet, deployment):
     
     deployment: sheet에 저장될 텍스트
     """
-    wb = load_workbook(deployment[0] + ".xlsx")
+    wb = load_workbook(file_path)
     ws = wb[sheet]
     for i in count(start=1):
         check = ws.cell(row=1, column=i).value
@@ -163,8 +163,13 @@ def deployment_input(input_text, input_type, save_list):
         return user_input.split()
 
 my_deployment = list()
-file_name = deployment_input("수정할 파일명을 입력하세요 (확장자 제외): ", 1, my_deployment) + ".xlsx"
-image_folder = Path.cwd() / "이미지" / file_name.split(".xlsx")[0]
+current_dir = Path.cwd()
+file_name = deployment_input("수정할 파일명을 입력하세요 (확장자 제외): ", 1, my_deployment)
+image_folder = current_dir / "이미지" / file_name.split(".xlsx")[0]
+deployment_folder = current_dir / "전개법" / file_name.split(".xlsx")[0]
+file_path = deployment_folder.with_suffix(".xlsx")
+
+# 폰트 설정
 alignment_style = Alignment(horizontal="center", vertical="center")
 font_style_card = Font(bold=True, size=30)
 font_style_text = Font(bold=True, size=11)
@@ -183,12 +188,12 @@ border_style = Border(
 
 try:
     # 기존 파일 열기
-    wb = load_workbook(file_name)
-    print(f"'{file_name}' 파일을 불러왔습니다.")
+    wb = load_workbook(file_path)
+    print(f"'{file_path}' 파일을 불러왔습니다.")
 except FileNotFoundError:
     # 파일이 없을 경우 새 파일 생성
     wb = Workbook()
-    print(f"'{file_name}' 파일이 없어 새 파일을 생성합니다.")
+    print(f"'{file_path}' 파일이 없어 새 파일을 생성합니다.")
 
 # 기존 시트 선택 또는 새로운 시트 생성
 sheet_name = deployment_input("작성할 시트명을 입력하세요: ", 1, my_deployment)
@@ -370,7 +375,7 @@ for row in ws.iter_rows(min_row=1, max_row=2, min_col=1, max_col=ws.max_column):
 ws.merge_cells('A1:O1')
 ws['A1'].alignment = Alignment(horizontal='left', vertical='center')
 
-wb.save(file_name)
+wb.save(file_path)
 
 my_deployment.append('')
 deployment_save("Sheet", my_deployment)
