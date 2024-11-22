@@ -3,6 +3,7 @@
 # 불필요한 코드 제거
 # 전개 텍스트 읽어서 만드는 기능
 # 전개 결과물 수비 표시 표현
+# 전개 텍스트 텍스트 파일로 관리하기
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
@@ -129,21 +130,26 @@ def find_location(current_target_idx=int, current_col_idx=int, targets=list, tar
     return False
 
 # 전개 텍스트 저장 함수
-def deployment_save(sheet, deployment):
+def deployment_text_save(text):
     """
-    sheet: 텍스트가 저장될 sheet의 이름
+    text: 저장될 텍스트
     
-    deployment: sheet에 저장될 텍스트
+    입력한 전개법 텍스트를 "전개법_텍스트" 폴더에 .txt 파일로 저장하는 함수
     """
-    wb = load_workbook(file_path)
-    ws = wb[sheet]
-    for i in count(start=1):
-        check = ws.cell(row=1, column=i).value
-        if check is None or check == deployment[1]:
-            ws.cell(row=1, column=i, value=sheet_name)
-            ws.cell(row=2, column=i, value="\n".join(map(str, deployment)))
-            wb.save(file_path)
-            return print(f"{chr(64 + i)}번에 {sheet_name} 전개 텍스트 저장")
+    text_file_path = Path.cwd() / "전개법_텍스트" / file_name / f"{sheet_name}.txt"
+    
+    try:
+        # text가 저장될 테마 폴더
+        deployment_text_folder = text_file_path.parent
+        if not deployment_text_folder.exists():
+            deployment_text_folder.mkdir(parents=True, exist_ok=True)
+            print(f"{deployment_folder} 폴더를 생성했습니다.")
+            
+        with open(text_file_path, "w", encoding="utf-8") as file:
+            file.write("\n".join(map(str, text)))
+    except Exception as e:
+        return print(f"전개법 텍스트 저장중 {e} 오류 발생")
+    return print(f"{text_file_path}에 전개 텍스트 저장")
 
 def deployment_input(input_text, input_type, save_list):
     """
@@ -165,8 +171,9 @@ def deployment_input(input_text, input_type, save_list):
 my_deployment = list()
 current_dir = Path.cwd()
 file_name = deployment_input("수정할 파일명을 입력하세요 (확장자 제외): ", 1, my_deployment)
-image_folder = current_dir / "이미지" / file_name.split(".xlsx")[0]
-deployment_folder = current_dir / "전개법" / file_name.split(".xlsx")[0]
+image_folder = current_dir / "이미지" / file_name
+deployment_folder = current_dir / "전개법" / file_name
+# deployment_text_folder = current_dir / "전개법_텍스트" / file_name
 file_path = deployment_folder.with_suffix(".xlsx")
 
 # 폰트 설정
@@ -378,5 +385,5 @@ ws['A1'].alignment = Alignment(horizontal='left', vertical='center')
 wb.save(file_path)
 
 my_deployment.append('')
-deployment_save("Sheet", my_deployment)
+deployment_text_save(my_deployment)
 print("저장 완료")
