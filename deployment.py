@@ -158,9 +158,9 @@ def deployment_input(input_text, input_type, save_list):
     user_input = input(input_text)
     save_list.append(user_input)
     if input_type:
-        return user_input
+        return user_input.replace("_", " ")
     else:
-        return user_input.split()
+        return [word.replace("_", " ") for word in user_input.split()]
 
 my_deployment = list()
 current_dir = Path.cwd()
